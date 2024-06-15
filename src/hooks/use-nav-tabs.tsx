@@ -32,7 +32,7 @@ export const useNavTabs = () => {
         icon: BatteryMediumIcon,
       },
     ],
-    []
+    [resolvedTheme]
   );
 
   const tabsWithActiveState = useMemo(() => {

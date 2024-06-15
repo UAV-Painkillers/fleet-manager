@@ -40,7 +40,7 @@ export default async function PilotIdPage(props: Props) {
   if (!pilot) {
     return (
       <div>
-        <p>Oh no! We couldn't find your profile.</p>
+        <p>Oh no! We couldn&apos;t find your profile.</p>
       </div>
     );
   }
