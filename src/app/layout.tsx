@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+import { NavMobile } from "@/components/nav-menu/nav-mobile";
+import { Header } from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
+import { Authentication } from "@/components/auth/authentication";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,9 +20,35 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isAuthenticated = false;
+
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" suppressHydrationWarning={true}>
+      <body
+        className={cn(
+          inter.className,
+          "flex flex-col bg-background antialiased min-h-dvh"
+        )}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Toaster theme="system" duration={6000} richColors closeButton />
+
+          <Authentication>
+            <Header />
+
+            <main className="flex-1 grid grid-cols-1 gap-8 px-4 lg:px-8 py-8">
+              {children}
+            </main>
+
+            <NavMobile />
+          </Authentication>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
