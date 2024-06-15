@@ -44,7 +44,7 @@ export function CodeBlock(
     >
       <div className="bg-gray-300 dark:bg-gray-700 px-4 py-2 flex items-center justify-between">
         <div className="text-sm font-medium text-gray-950 dark:text-gray-200">
-          {props.language}
+          {props.title}
         </div>
         <div className="flex items-center gap-2">
           <CopyButton
