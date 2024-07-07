@@ -2,7 +2,6 @@
 
 import { ShareButton, ShareButtonProps } from "@/components/share-button";
 import { usePilotShareURL } from "./use-pilot-share-url";
-import { ButtonProps } from "../ui/button";
 
 interface Props {
   shareHandle: string;

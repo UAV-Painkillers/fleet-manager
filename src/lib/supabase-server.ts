@@ -10,10 +10,6 @@ export function getSupabaseServer() {
     const cookieStore = cookies();
 
     const { anonKey, url } = getSupabaseEnvVariables();
-    console.log({
-      anonKey,
-      url,
-    });
 
     supabaseServer = createServerClient(url, anonKey, {
       cookies: {

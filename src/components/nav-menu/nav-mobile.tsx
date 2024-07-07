@@ -1,12 +1,17 @@
 "use client";
 import Link from "next/link";
 import { useNavTabs } from "../../hooks/use-nav-tabs";
-import { useState, useEffect, useCallback } from "react";
-import { usePathnameIsActive } from "../../hooks/use-pathname-is-active";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { useAuth } from "@/store/auth";
 
-export function NavMobile() {
+interface Props {
+  onWantsToLogin: () => void;
+}
+export function NavMobile(props: Props) {
   const { tabs } = useNavTabs();
+
+  const { session } = useAuth();
 
   return (
     <nav className="bg-white border-t dark:bg-gray-950 dark:border-gray-800 lg:hidden sticky bottom-0 z-10">
@@ -27,6 +32,16 @@ export function NavMobile() {
             {tab.label}
           </Link>
         ))}
+
+        {/* Login Button */}
+        {!session && (
+          <Link
+            className="text-sm font-medium text-gray-900 hover:underline dark:text-gray-50"
+            href="/"
+          >
+            Log in
+          </Link>
+        )}
       </div>
     </nav>
   );

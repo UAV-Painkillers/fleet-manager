@@ -21,14 +21,14 @@ import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AuthLayout } from "./auth-layout";
+import { AuthWrapper } from "./auth-wrapper";
 
 interface Props {
   onWantsToLogin: () => void;
 }
 export function ForgotPassword(props: Props) {
   return (
-    <AuthLayout title="Reset your password">
+    <AuthWrapper title="Reset your password">
       <form className="space-y-4">
         <div>
           <Label htmlFor="email">Email</Label>
@@ -47,6 +47,6 @@ export function ForgotPassword(props: Props) {
           Back to Login
         </Button>
       </div>
-    </AuthLayout>
+    </AuthWrapper>
   );
 }

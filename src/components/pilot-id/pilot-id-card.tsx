@@ -6,7 +6,6 @@ import {
   GlobeIcon,
   MailIcon,
   PhoneIcon,
-  UploadIcon,
   PencilIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -20,41 +19,83 @@ import { Separator } from "../ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { PilotIdEditSheet } from "./pilot-id-edit-sheet";
 import { usePilotAvatarPlaceholder } from "@/hooks/use-pilot-avatar-placeholder";
+import { PilotIdDocumentsCard } from "./documents/pilot-id-documents-card";
+import { FacebookIcon } from "../icons/facebook-icon";
+import { TikTokIcon } from "../icons/tiktok-icon";
+import { link } from "fs";
 
 export type PartialPilot = Partial<PilotDB>;
 
 function SocialMediaLinks({ pilot }: { pilot: PartialPilot }) {
+  const handleWithAtSign = useCallback((handle: string | undefined | null) => {
+    if (!handle) {
+      return undefined;
+    }
+
+    return handle.startsWith("@") ? handle : "@" + handle;
+  }, []);
+
+  const socialMediaLinks = useMemo(() => {
+    return [
+      {
+        prefix: "https://www.facebook.com/",
+        handle: pilot.facebook_handle,
+        icon: FacebookIcon,
+        label: "Facebook",
+      },
+      {
+        prefix: "https://www.tiktok.com/",
+        handle: handleWithAtSign(pilot.tiktok_handle),
+        icon: TikTokIcon,
+        label: "TikTok",
+      },
+      {
+        prefix: "https://www.instagram.com/",
+        handle: pilot.instagram_handle,
+        icon: InstagramIcon,
+        label: "Instagram",
+      },
+      {
+        prefix: "https://www.youtube.com/",
+        handle: handleWithAtSign(pilot.youtube_handle),
+        icon: YoutubeIcon,
+        label: "Youtube",
+      },
+    ].filter((linkDefinition) => linkDefinition.handle) as Array<{
+      prefix: string;
+      handle: string;
+      icon: React.FC<React.SVGProps<SVGSVGElement>>;
+      label: string;
+    }>;
+  }, [
+    pilot.facebook_handle,
+    pilot.tiktok_handle,
+    pilot.instagram_handle,
+    pilot.youtube_handle,
+    handleWithAtSign,
+  ]);
+
   return (
     <div className="flex items-center space-x-4">
-      <Link
-        href="#"
-        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-        prefetch={false}
-      >
-        <TwitterIcon className="w-6 h-6" />
-        <span className="sr-only">Twitter</span>
-      </Link>
-      <Link
-        href="#"
-        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-        prefetch={false}
-      >
-        <InstagramIcon className="w-6 h-6" />
-        <span className="sr-only">Instagram</span>
-      </Link>
-      <Link
-        href="#"
-        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-        prefetch={false}
-      >
-        <YoutubeIcon className="w-6 h-6" />
-        <span className="sr-only">Youtube</span>
-      </Link>
+      {socialMediaLinks.map((linkDefinition) => (
+        <Link
+          key={`social-media-link--${linkDefinition.prefix}`}
+          href={`${linkDefinition.prefix}${linkDefinition.handle}`}
+          className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+          prefetch={false}
+          target="_blank"
+        >
+          <linkDefinition.icon className="w-6 h-6" />
+          <span className="sr-only">{linkDefinition.label}</span>
+        </Link>
+      ))}
     </div>
   );
 }
 
-export function PilotIdCard({ pilot }: { pilot: PartialPilot }) {
+export function PilotIdCard(props: { pilot: PartialPilot }) {
+  const { pilot } = props;
+
   const fallbackBannerHref = "/placeholder.svg";
   const fallbackAvatarHref = usePilotAvatarPlaceholder(pilot.id ?? 0);
 
@@ -78,7 +119,10 @@ export function PilotIdCard({ pilot }: { pilot: PartialPilot }) {
             height="800"
           />
           <Avatar className="absolute top-4 left-4 border-4 border-white dark:border-gray-900 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28">
-            <AvatarImage src={pilot.logoHref ?? fallbackAvatarHref} className="bg-gray-200" />
+            <AvatarImage
+              src={pilot.logoHref ?? fallbackAvatarHref}
+              className="bg-gray-200"
+            />
             <AvatarFallback>{pilotNameShorthand}</AvatarFallback>
           </Avatar>
 
@@ -98,6 +142,7 @@ export function PilotIdCard({ pilot }: { pilot: PartialPilot }) {
                   <span className="sr-only">Edit</span>
                 </Button>
               }
+              reloadOnSave
             />
           </div>
         </div>
@@ -113,8 +158,6 @@ export function PilotIdCard({ pilot }: { pilot: PartialPilot }) {
                   @{pilot.nickname}
                 </p>
               )}
-
-              ID: {pilot.id}
             </div>
 
             <SocialMediaLinks pilot={pilot} />
@@ -125,6 +168,15 @@ export function PilotIdCard({ pilot }: { pilot: PartialPilot }) {
           <div className="grid grid-cols-1 sm:grid-cols-1 md-grid-cols-2 lg:grid-cols-9 gap-6">
             <Card className="col-span-1 lg:col-span-4">
               <CardContent className="p-4">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold">Contact Information</h2>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Get in touch with me.
+                    <br />
+                    <small>&nbsp;</small>
+                  </p>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     {pilot.contact_phone && (
@@ -157,25 +209,8 @@ export function PilotIdCard({ pilot }: { pilot: PartialPilot }) {
               </CardContent>
             </Card>
 
-            <Card className="col-span-1 lg:col-span-5">
-              <CardContent className="p-4 space-y-6">
-                <div className="space-y-1">
-                  <h2 className="text-lg font-semibold">Documents</h2>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Legal, Insurance and other Documents.
-                    <br />
-                    <small>(These are only visible to yourself)</small>
-                  </p>
-
-                  <div className="flex items-center space-x-4 pt-4">
-                    <Button variant="outline">
-                      <UploadIcon className="w-5 h-5 mr-2" />
-                      Upload Document
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Documents */}
+            <PilotIdDocumentsCard />
           </div>
         </CardContent>
       </Card>

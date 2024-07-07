@@ -36,30 +36,30 @@ export type Database = {
     Tables: {
       documents: {
         Row: {
-          category: string
+          category: Database["public"]["Enums"]["document_category"]
           created_at: string
           id: number
+          name: string
           original_file_name: string
           path: string
-          title: string
           user_id: string
         }
         Insert: {
-          category?: string
+          category: Database["public"]["Enums"]["document_category"]
           created_at?: string
           id?: number
-          original_file_name?: string
-          path?: string
-          title?: string
+          name: string
+          original_file_name: string
+          path: string
           user_id?: string
         }
         Update: {
-          category?: string
+          category?: Database["public"]["Enums"]["document_category"]
           created_at?: string
           id?: number
+          name?: string
           original_file_name?: string
           path?: string
-          title?: string
           user_id?: string
         }
         Relationships: []
@@ -129,7 +129,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      document_category: "legal" | "miscellaneous" | "insurance"
     }
     CompositeTypes: {
       [_ in never]: never

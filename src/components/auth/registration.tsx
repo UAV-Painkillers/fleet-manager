@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { DiscordIcon } from "../icons/discord-icon";
 import { ChromeIcon } from "../icons/chrome-icon";
 import { FacebookIcon } from "../icons/facebook-icon";
-import { AuthLayout } from "./auth-layout";
+import { AuthWrapper } from "./auth-wrapper";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { getSupabase } from "@/lib/supabase";
@@ -85,7 +85,7 @@ export function Registration(props: Props) {
     );
 
   return (
-    <AuthLayout title="Create an account">
+    <AuthWrapper title="Create an account">
       <div className="space-y-2">
         <Button className="w-full" variant="outline">
           <FacebookIcon className="mr-2 h-4 w-4" />
@@ -163,6 +163,6 @@ export function Registration(props: Props) {
           Already have an account?
         </Button>
       </div>
-    </AuthLayout>
+    </AuthWrapper>
   );
 }

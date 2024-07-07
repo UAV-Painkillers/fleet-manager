@@ -26,7 +26,7 @@ import { ChromeIcon } from "../icons/chrome-icon";
 import { FacebookIcon } from "../icons/facebook-icon";
 import { useCallback, useState } from "react";
 import { ForgotPassword } from "./forgot-password";
-import { AuthLayout } from "./auth-layout";
+import { AuthWrapper } from "./auth-wrapper";
 import { toast } from "sonner";
 import { getSupabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
@@ -73,7 +73,7 @@ export function Login(props: Props) {
   }
 
   return (
-    <AuthLayout title="Sign in to your account">
+    <AuthWrapper title="Sign in to your account">
       <div className="space-y-2">
         <Button className="w-full" variant="outline">
           <FacebookIcon className="mr-2 h-4 w-4" />
@@ -149,6 +149,6 @@ export function Login(props: Props) {
           Create an account
         </Button>
       </div>
-    </AuthLayout>
+    </AuthWrapper>
   );
 }

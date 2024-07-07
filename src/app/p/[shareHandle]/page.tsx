@@ -2,16 +2,35 @@ import { PilotIdCard } from "@/components/pilot-id/pilot-id-card";
 import { CodeBlock } from "@/components/ui/code-block";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { Pilot } from "@/types/supabase-custom";
+import { useEffect } from "react";
 
 async function pilotProfileFetcher(shareHandle: string) {
   const supabase = getSupabaseServer();
-  return await supabase
+  const { data, error } = await supabase
     .from("pilots")
     .select("*")
     .eq("share_handle", shareHandle)
     .limit(1)
-    .returns<Pilot>()
-    .single();
+    .returns<Pilot[]>();
+
+  if (error?.code === "PGRST116") {
+    return {
+      error: null,
+      data: null,
+    };
+  }
+
+  if (data?.length !== 1) {
+    return {
+      error: new Error("PILOT_ID_NOT_FOUND"),
+      data: null,
+    };
+  }
+
+  return {
+    error,
+    data: data[0],
+  };
 }
 
 interface Props {
@@ -24,15 +43,13 @@ export default async function PilotIdPage(props: Props) {
 
   const { error, data: pilot } = await pilotProfileFetcher(shareHandle);
 
-  console.log({
-    error, pilot
-  })
-
   if (error) {
     return (
       <div>
-        <p>Oh no! Something went wrong while loading your profile.</p>
-        <CodeBlock title="Error Details">{JSON.stringify(error, null, 4)}</CodeBlock>
+        <p>Oh no! Something went wrong while loading the pilot-id.</p>
+        <CodeBlock title="Error Details">
+          {JSON.stringify(error, null, 4)}
+        </CodeBlock>
       </div>
     );
   }
@@ -40,7 +57,7 @@ export default async function PilotIdPage(props: Props) {
   if (!pilot) {
     return (
       <div>
-        <p>Oh no! We couldn&apos;t find your profile.</p>
+        <p>Oh no! We couldn&apos;t find the pilot-id.</p>
       </div>
     );
   }

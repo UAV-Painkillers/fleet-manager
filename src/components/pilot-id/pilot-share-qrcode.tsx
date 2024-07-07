@@ -11,5 +11,5 @@ interface Props {
 export function PilotShareQRCode(props: Props) {
   const pilotShareURL = usePilotShareURL(props.shareHandle);
 
-  return <QRCode text={pilotShareURL} options={{ width: props.width }} />;
+  return pilotShareURL && <QRCode text={pilotShareURL} options={{ width: props.width }} />;
 }

@@ -6,7 +6,11 @@ import { Login } from "./login";
 import { getSupabase } from "@/lib/supabase";
 import { useAuth } from "@/store/auth";
 
-export function Authentication(props: React.PropsWithChildren) {
+type AuthenticationProviderProps = React.PropsWithChildren & {
+  childrenNeedsToBeAuthenticated?: boolean;
+  childrenRequireAuthentication?: boolean;
+}
+export function AuthenticationProvider(props: AuthenticationProviderProps) {
   const [wantsToLogin, setWantsToLogin] = useState(true);
   const [supabase] = useState(getSupabase());
 
@@ -30,6 +34,10 @@ export function Authentication(props: React.PropsWithChildren) {
   }, [supabase, setSession]);
 
   if (session) {
+    return props.children;
+  }
+
+  if (props.childrenRequireAuthentication === false) {
     return props.children;
   }
 
