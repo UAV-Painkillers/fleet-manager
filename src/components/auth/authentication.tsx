@@ -5,11 +5,12 @@ import { Registration } from "./registration";
 import { Login } from "./login";
 import { getSupabase } from "@/lib/supabase";
 import { useAuth } from "@/store/auth";
+import { FakeProgress } from "../ui/fake-progress";
 
 type AuthenticationProviderProps = React.PropsWithChildren & {
   childrenNeedsToBeAuthenticated?: boolean;
   childrenRequireAuthentication?: boolean;
-}
+};
 export function AuthenticationProvider(props: AuthenticationProviderProps) {
   const [wantsToLogin, setWantsToLogin] = useState(true);
   const [supabase] = useState(getSupabase());
@@ -19,15 +20,20 @@ export function AuthenticationProvider(props: AuthenticationProviderProps) {
     session: state.session,
   }));
 
+  const [isFetchingSession, setIsFetchingSession] = useState(true);
+
   useEffect(() => {
+    setIsFetchingSession(true);
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setIsFetchingSession(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setIsFetchingSession(false);
     });
 
     return () => subscription.unsubscribe();
@@ -39,6 +45,17 @@ export function AuthenticationProvider(props: AuthenticationProviderProps) {
 
   if (props.childrenRequireAuthentication === false) {
     return props.children;
+  }
+
+  if (isFetchingSession) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <FakeProgress />
+        <p className="mt-4 text-sm text-muted-foreground">
+          Loading your session...
+        </p>
+      </div>
+    );
   }
 
   if (wantsToLogin) {

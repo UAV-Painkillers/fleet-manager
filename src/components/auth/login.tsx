@@ -41,10 +41,11 @@ export function Login(props: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailSignInInProgress, setEmailSignInInProgress] = useState(false);
+  const [oauthLoginInProgress, setOauthLoginInProgress] = useState(false);
 
   const handleEmailLoginFormSubmit: React.FormEventHandler<HTMLFormElement> =
     useCallback(
-      async (e) => {
+      async (e: MouseEvent) => {
         e.preventDefault();
 
         setEmailSignInInProgress(true);
@@ -66,6 +67,25 @@ export function Login(props: Props) {
       [supabase, email, password]
     );
 
+  const signInWithOAuth = useCallback(
+    async (provider: "facebook") => {
+      setOauthLoginInProgress(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+      });
+      setOauthLoginInProgress(false);
+
+      if (error) {
+        toast.error(`Oh no, something went wrong: ${error.message}`);
+        console.error(error);
+        return;
+      }
+
+      toast.success("Welcome back!");
+    },
+    [supabase]
+  );
+
   if (hasForgottenPassword) {
     return (
       <ForgotPassword onWantsToLogin={() => setHasForgottenPassword(false)} />
@@ -75,15 +95,15 @@ export function Login(props: Props) {
   return (
     <AuthWrapper title="Sign in to your account">
       <div className="space-y-2">
-        <Button className="w-full" variant="outline">
+        <Button className="w-full" variant="outline" onClick={() => signInWithOAuth("facebook")}>
           <FacebookIcon className="mr-2 h-4 w-4" />
           Sign in with Facebook
         </Button>
-        <Button className="w-full" variant="outline">
+        <Button className="w-full" variant="outline" onClick={() => signInWithOAuth("google")}>
           <ChromeIcon className="mr-2 h-4 w-4" />
           Sign in with Google
         </Button>
-        <Button className="w-full" variant="outline">
+        <Button className="w-full" variant="outline" onClick={() => signInWithOAuth("discord")}>
           <DiscordIcon className="mr-2 h-4 w-4" />
           Sign in with Discord
         </Button>

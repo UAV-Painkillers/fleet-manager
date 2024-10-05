@@ -6,7 +6,6 @@ import { Button } from "../ui/button";
 import { useAuth } from "@/store/auth";
 
 interface Props {
-  onWantsToLogin: () => void;
 }
 export function NavMobile(props: Props) {
   const { tabs } = useNavTabs();

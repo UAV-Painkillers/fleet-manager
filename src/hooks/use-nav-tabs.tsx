@@ -10,7 +10,7 @@ export interface NavTab {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 
-export const useNavTabs = () => {
+export function useNavTabs() {
   const pathnameIsActive = usePathnameIsActive();
   const { resolvedTheme } = useTheme();
 
@@ -35,12 +35,13 @@ export const useNavTabs = () => {
     [resolvedTheme]
   );
 
-  const tabsWithActiveState = useMemo(() => {
-    return allTabs.map((tab) => ({
-      ...tab,
-      isActive: pathnameIsActive(tab.pathname),
-    }));
-  }, [pathnameIsActive, allTabs]);
+  const tabsWithActiveState: (NavTab & { isActive: boolean })[] =
+    useMemo(() => {
+      return allTabs.map((tab) => ({
+        ...tab,
+        isActive: pathnameIsActive(tab.pathname),
+      }));
+    }, [pathnameIsActive, allTabs]);
 
   const activeTab = useMemo(() => {
     return tabsWithActiveState.find((tab) => tab.isActive);
@@ -50,4 +51,4 @@ export const useNavTabs = () => {
     tabs: tabsWithActiveState,
     activeTab,
   };
-};
+}
