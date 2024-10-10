@@ -1,8 +1,16 @@
+"use server";
+
 import { MountainIcon } from "lucide-react";
 import { NavDesktop } from "./nav-menu/nav-desktop";
 import Link from "next/link";
+import { getSupabaseServerClient } from "@/lib/supabase.server";
 
-export function Header() {
+export async function Header() {
+  const {
+    data: { user },
+  } = await getSupabaseServerClient().auth.getUser();
+  const isAuthenticated = !!user;
+
   return (
     <header className="bg-white px-4 lg:px-6 h-14 flex items-center justify-between border-b dark:bg-gray-950 dark:border-gray-800 sticky top-0 z-10">
       <Link href="#" className="flex items-center" prefetch={false}>
@@ -11,7 +19,7 @@ export function Header() {
       </Link>
 
       <div>
-        <NavDesktop />
+        <NavDesktop isAuthenticated={isAuthenticated} />
       </div>
     </header>
   );

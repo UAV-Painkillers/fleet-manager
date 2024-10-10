@@ -1,51 +1,40 @@
-"use client";
+"use server";
 
-import { FileIcon, UploadIcon } from "lucide-react";
-import { Button } from "../../ui/button";
+import { FileIcon } from "lucide-react";
 import { Card, CardContent } from "../../ui/card";
-import { useAuth } from "@/store/auth";
-import { useCallback, useEffect, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
-import { nanoid } from "nanoid";
+import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { Document } from "@/types/supabase-custom";
 import { PilotIdDocumentsUploadButton } from "./pilot-id-documents-upload-button";
 
-export function PilotIdDocumentsCard() {
-  const { session } = useAuth();
+async function fetchDocuments() {
+  const supabase = getSupabaseServerClient();
 
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [openedDocument, setOpenedDocument] = useState<Document | null>(null);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const onDocumentCreated = useCallback((document: Document) => {
-    setDocuments((currentDocuments) => [...currentDocuments, document]);
-    setOpenedDocument(document);
-  }, []);
+  if (!user) {
+    return {
+      error: "NOT_AUTHENTICATED",
+    };
+  }
 
-  const fetchDocuments = useCallback(async () => {
-    if (!session) {
-      return;
-    }
+  const { data, error } = await supabase
+    .from("documents")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from("documents")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .order("created_at", { ascending: false });
+  return {
+    documents: (data as Document[]) || undefined,
+    error,
+  };
+}
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+export async function PilotIdDocumentsCard() {
+  const { documents, error } = await fetchDocuments();
 
-    setDocuments(data ?? []);
-  }, [session]);
-
-  useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
-
-  if (!session) {
+  if (error === "NOT_AUTHENTICATED") {
     return null;
   }
 
@@ -63,18 +52,20 @@ export function PilotIdDocumentsCard() {
           </div>
 
           <div className="flex flex-col space-y-4">
-            {documents.map((document) => (
-              <div key={document.id} className="flex items-center space-x-4">
-                <FileIcon className="w-5 h-5" />
-                <span>{document.original_file_name}</span>
-              </div>
-            ))}
+            {error ? (
+              <div>Error: {JSON.stringify(error, null, 4)}</div>
+            ) : (
+              documents?.map((document) => (
+                <div key={document.id} className="flex items-center space-x-4">
+                  <FileIcon className="w-5 h-5" />
+                  <span>{document.original_file_name}</span>
+                </div>
+              ))
+            )}
           </div>
 
           <div className="flex items-center space-x-4 pt-4">
-            <PilotIdDocumentsUploadButton
-              onDocumentCreated={onDocumentCreated}
-            />
+            <PilotIdDocumentsUploadButton />
           </div>
         </div>
       </CardContent>

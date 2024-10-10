@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -13,71 +12,27 @@ import {
 } from "@/components/ui/sheet";
 import { Card, CardContent } from "../ui/card";
 import {
-  PencilIcon,
   PhoneIcon,
   MailIcon,
   GlobeIcon,
-  UploadIcon,
   InstagramIcon,
-  TwitterIcon,
   YoutubeIcon,
   LoaderIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { FormEventHandler, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { PartialPilot } from "./pilot-id-card";
-import Link from "next/link";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { cloneDeep, isLength, merge } from "lodash-es";
 import { usePilotAvatarPlaceholder } from "@/hooks/use-pilot-avatar-placeholder";
-import { useAuth } from "@/store/auth";
-import { getSupabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { FacebookIcon } from "../icons/facebook-icon";
 import { TikTokIcon } from "../icons/tiktok-icon";
-
-interface SocialMediaLinksProps extends React.HTMLAttributes<HTMLDivElement> {
-  pilot: PartialPilot;
-}
-function SocialMediaLinks(props: SocialMediaLinksProps) {
-  const { pilot, ...rest } = props;
-  return (
-    <div
-      {...rest}
-      className={cn("flex items-center space-x-4", rest.className)}
-    >
-      <Link
-        href="#"
-        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-        prefetch={false}
-      >
-        <TwitterIcon className="w-6 h-6" />
-        <span className="sr-only">Twitter</span>
-      </Link>
-      <Link
-        href="#"
-        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-        prefetch={false}
-      >
-        <InstagramIcon className="w-6 h-6" />
-        <span className="sr-only">Instagram</span>
-      </Link>
-      <Link
-        href="#"
-        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-        prefetch={false}
-      >
-        <YoutubeIcon className="w-6 h-6" />
-        <span className="sr-only">Youtube</span>
-      </Link>
-    </div>
-  );
-}
+import { updatePilotIdAction } from "./pilot-id-edit-sheet.actions";
 
 export type PilotIdEditSheetProps = Omit<React.FC<DialogProps>, "trigger"> & {
   trigger: React.ReactNode;
@@ -95,10 +50,7 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
     ...dialogProps
   } = props;
 
-  const { session } = useAuth();
-
   const [pilot, setPilot] = useState<PartialPilot>(incomingPilot);
-  const [supabase] = useState(getSupabase());
   const [isSaving, setIsSaving] = useState(false);
 
   const setField: <T extends keyof PartialPilot>(
@@ -123,28 +75,20 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
   }, [pilot.name]);
 
   const onSubmit = useCallback(async () => {
-    setIsSaving(true);
-    const { error, data } = await supabase
-      .from("pilots")
-      .update({
-        name: pilot.name,
-        nickname: pilot.nickname,
-        bio: pilot.bio,
-        logoHref: pilot.logoHref,
-        bannerHref: pilot.bannerHref,
-        tiktok_handle: pilot.tiktok_handle,
-        youtube_handle: pilot.youtube_handle,
-        instagram_handle: pilot.instagram_handle,
-        contact_phone: pilot.contact_phone,
-        contact_email: pilot.contact_email,
-        contact_website: pilot.contact_website,
-        facebook_handle: pilot.facebook_handle,
-      })
-      .eq("id", pilot.id)
-      .select("*")
-      .returns<PartialPilot[]>();
-
-    setIsSaving(false);
+    const { error, data } = await updatePilotIdAction({
+      name: pilot.name,
+      nickname: pilot.nickname,
+      bio: pilot.bio,
+      logoHref: pilot.logoHref,
+      bannerHref: pilot.bannerHref,
+      tiktok_handle: pilot.tiktok_handle,
+      youtube_handle: pilot.youtube_handle,
+      instagram_handle: pilot.instagram_handle,
+      contact_phone: pilot.contact_phone,
+      contact_email: pilot.contact_email,
+      contact_website: pilot.contact_website,
+      facebook_handle: pilot.facebook_handle,
+    });
 
     if (error) {
       toast.error("Oh no! Something went wrong while saving your Pilot ID.");
@@ -152,17 +96,8 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
       return;
     }
 
-    if (data.length !== 1) {
-      console.error(
-        "Expected 1 result from pilot-id update query, got",
-        data.length,
-        data
-      );
-      return;
-    }
-
     if (typeof onPilotSaved === "function") {
-      onPilotSaved(data[0]);
+      onPilotSaved(data);
     }
 
     if (reloadOnSave) {
@@ -181,7 +116,6 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
     pilot.contact_phone,
     pilot.contact_website,
     pilot.facebook_handle,
-    pilot.id,
     pilot.instagram_handle,
     pilot.logoHref,
     pilot.name,
@@ -189,7 +123,6 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
     pilot.tiktok_handle,
     pilot.youtube_handle,
     reloadOnSave,
-    supabase,
   ]);
 
   const socialMediaInputs = useMemo(() => {
@@ -220,10 +153,6 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
       label: string;
     }>;
   }, []);
-
-  if (!session) {
-    return null;
-  }
 
   return (
     <Sheet {...dialogProps}>
@@ -354,13 +283,18 @@ export function PilotIdEditSheet(props: PilotIdEditSheetProps) {
                           >
                             <inputDefinition.icon className="w-5 h-5" />
                             <div>
-                              <Label htmlFor={inputDefinition.field}>{inputDefinition.label}</Label>
+                              <Label htmlFor={inputDefinition.field}>
+                                {inputDefinition.label}
+                              </Label>
                               <Input
                                 id={inputDefinition.field}
                                 type="text"
                                 value={pilot[inputDefinition.field] ?? ""}
                                 onChange={(e) =>
-                                  setField(inputDefinition.field, e.target.value)
+                                  setField(
+                                    inputDefinition.field,
+                                    e.target.value
+                                  )
                                 }
                                 required
                               />

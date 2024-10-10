@@ -22,7 +22,6 @@ import { usePilotAvatarPlaceholder } from "@/hooks/use-pilot-avatar-placeholder"
 import { PilotIdDocumentsCard } from "./documents/pilot-id-documents-card";
 import { FacebookIcon } from "../icons/facebook-icon";
 import { TikTokIcon } from "../icons/tiktok-icon";
-import { link } from "fs";
 
 export type PartialPilot = Partial<PilotDB>;
 
@@ -93,8 +92,11 @@ function SocialMediaLinks({ pilot }: { pilot: PartialPilot }) {
   );
 }
 
-export function PilotIdCard(props: { pilot: PartialPilot }) {
-  const { pilot } = props;
+export async function PilotIdCard(props: {
+  pilot: PartialPilot;
+  editMode: boolean;
+}) {
+  const { pilot, editMode } = props;
 
   const fallbackBannerHref = "/placeholder.svg";
   const fallbackAvatarHref = usePilotAvatarPlaceholder(pilot.id ?? 0);
@@ -130,20 +132,22 @@ export function PilotIdCard(props: { pilot: PartialPilot }) {
             <PilotShareButton shareHandle={pilot.share_handle ?? ""} />
 
             {/* buttin with pencil icon to edit profile */}
-            <PilotIdEditSheet
-              pilot={pilot}
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full bg-white dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 border-2 border-white dark:border-gray-900"
-                >
-                  <PencilIcon className="w-6 h-6" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-              }
-              reloadOnSave
-            />
+            {editMode && (
+              <PilotIdEditSheet
+                pilot={pilot}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full bg-white dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 border-2 border-white dark:border-gray-900"
+                  >
+                    <PencilIcon className="w-6 h-6" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                }
+                reloadOnSave
+              />
+            )}
           </div>
         </div>
 

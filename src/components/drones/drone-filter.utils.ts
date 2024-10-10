@@ -9,7 +9,12 @@ export function useDroneFilterCriteria() {
   const sortBy = (searchParams.get("sortBy") as SortBy) || SortBy.name;
   const filterText = searchParams.get("filterText") || "";
   const statusFilterSearchParam = searchParams.get("statusFilter");
-  let statusFilter: DroneStatus | "all" = Number(statusFilterSearchParam);
+  let statusFilter: DroneStatus[keyof DroneStatus] | "all" = statusFilterSearchParam as 'all';
+
+  if (statusFilter !== "all") {
+    statusFilter = parseInt(statusFilter, 10) as DroneStatus[keyof DroneStatus];
+  }
+
   if (Number.isNaN(statusFilter)) {
     statusFilter = "all";
   }

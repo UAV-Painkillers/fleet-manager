@@ -1,113 +1,76 @@
-import { Button } from "@/components/ui/button";
-import { getSupabase } from "@/lib/supabase";
-import { useAuth } from "@/store/auth";
+"use client";
+
+import { Button } from "@/components/ui/button.extended";
 import { Document } from "@/types/supabase-custom";
-import { PostgrestError } from "@supabase/supabase-js";
 import { UploadIcon } from "lucide-react";
-import { nanoid } from "nanoid";
-import { useCallback } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
+import { uploadDocumentFormAction } from "./pilot-id-documents-upload-button.action";
 import { toast } from "sonner";
 
 interface Props {
   onDocumentCreated?: (document: Document) => void;
 }
 export function PilotIdDocumentsUploadButton(props: Props) {
-  const { session } = useAuth();
+  const fileInput = useRef<HTMLInputElement>(null);
+  const submitButton = useRef<HTMLButtonElement>(null);
 
-  const toastGenericError = useCallback((error: Error | PostgrestError) => {
-    toast.error(
-      "Oh no! Something went wrong while uploading your document." +
-        " " +
-        error.message
-    );
+  const [isUploading, startUploadTransition] = useTransition();
+
+  const submitForm = useCallback(() => {
+    if ((fileInput.current?.files?.length ?? 0) === 0) {
+      return;
+    }
+
+    submitButton.current?.click();
   }, []);
 
-  const createFileMetaData = useCallback(
-    async (file: File, fileId: string) => {
-      if (!session) {
-        return;
-      }
-
-      const meta: Omit<Document, "id" | "created_at"> = {
-        original_file_name: file.name,
-        path: fileId,
-        name: file.name,
-        user_id: session.user.id,
-        category: "miscellaneous",
-      };
-
-      const supabase = getSupabase();
-
-      const { data, error } = await supabase
-        .from("documents")
-        .insert(meta)
-        .select("*")
-        .single();
-
-      if (error) {
-        toastGenericError(error);
-        console.error(error);
-        return;
-      }
-
-      toast.success("Document uploaded successfully");
-
-      if (typeof props.onDocumentCreated === "function") {
-        props.onDocumentCreated(data);
-      }
-    },
-    [props, session, toastGenericError]
-  );
-
-  const uploadFile = useCallback(
-    async (file: File) => {
-      if (!session) {
-        return;
-      }
-
-      const fileId = `users/${session.user.id}/documents/${nanoid()}`;
-
-      const supabase = getSupabase();
-      const { error } = await supabase.storage
-        .from("documents")
-        .upload(fileId, file, {
-          upsert: false,
-        });
-
-      if (error) {
-        toastGenericError(error);
-        console.error(error);
-        return;
-      }
-
-      await createFileMetaData(file, fileId);
-    },
-    [createFileMetaData, session, toastGenericError]
-  );
-
-  const openFilePicker = useCallback(async () => {
-    const input = document.createElement("input") as HTMLInputElement;
-    input.type = "file";
-    input.addEventListener("change", async () => {
-      const file = input.files?.[0];
-      if (!file) {
-        return;
-      }
-
-      await uploadFile(file);
-    });
-
-    input.click();
-  }, [uploadFile]);
-
   const onUploadButtonClick = useCallback(async () => {
-    openFilePicker();
-  }, [openFilePicker]);
+    fileInput.current?.click();
+  }, []);
+
+  const onSubmit = useCallback(async (formData: FormData) => {
+    startUploadTransition(async () => {
+      const { error, document } = await uploadDocumentFormAction(formData);
+
+      if (error) {
+        toast.error(
+          `Oh no! Something went wrong while uploading your document. ${error}`
+        );
+        return;
+      }
+
+      let shortenedName = document.name.substring(0, 30);
+      if (shortenedName.length < document.name.length) {
+        shortenedName += "...";
+      }
+
+      toast.success(`Document "${shortenedName}" uploaded successfully`);
+
+      if (fileInput.current) {
+        fileInput.current.value = "";
+      }
+    });
+  }, []);
 
   return (
-    <Button variant="outline" onClick={onUploadButtonClick}>
-      <UploadIcon className="w-5 h-5 mr-2" />
-      Upload Document
-    </Button>
+    <form action={onSubmit}>
+      <input
+        type="file"
+        name="file"
+        className="hidden"
+        ref={fileInput}
+        onChange={submitForm}
+      />
+      <Button
+        variant="outline"
+        onClick={onUploadButtonClick}
+        type="button"
+        loading={isUploading}
+      >
+        <UploadIcon className="w-5 h-5 mr-2" />
+        Upload Document
+      </Button>
+      <button type="submit" className="hidden" ref={submitButton} />
+    </form>
   );
 }

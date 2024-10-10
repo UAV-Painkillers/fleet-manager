@@ -1,7 +1,13 @@
+"use server";
+
 import { DroneGrid } from "@/components/drones/drone-grid";
 import { SortBy, SortFilter } from "@/components/drones/sort-filter";
-import { getSupabase } from "@/lib/supabase";
-import { Drone, DroneStatus } from "@/types/supabase-custom";
+import { getSupabaseServerClient } from "@/lib/supabase.server";
+import {
+  Drone,
+  FullDroneSelectStatement,
+  DroneStatus,
+} from "@/types/supabase-custom";
 
 interface FetchDronesProps {
   sortBy: SortBy;
@@ -13,42 +19,49 @@ async function fetchDrones(
 ): Promise<{ drones: Drone[]; error: Error | null }> {
   const { sortBy, filterText, statusFilter } = props;
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseServerClient();
 
-  let query = supabase.from("drones").select(
-    `
-  *,
-  frame:frame_id (
-    *,
-    manufacturer:manufacturer_id (*)
-  )
-`
-  );
+  let query = supabase.from("drones").select(FullDroneSelectStatement);
 
   if (filterText) {
-    query.ilike('nickname', `%${filterText}%`);
+    query.ilike("nickname", `%${filterText}%`);
   }
-  
+
   if (statusFilter && statusFilter !== "all") {
-    query.eq('status', statusFilter);
+    query.eq("status", statusFilter);
   }
 
   if (sortBy === SortBy.status) {
-    query.order('status', { ascending: true });
+    query.order("status", { ascending: true });
   } else {
-    query.order('nickname', { ascending: true });
+    query.order("nickname", { ascending: true });
   }
 
   const { data, error } = await query.limit(100);
 
   if (error) {
+    console.error(error);
     return {
       drones: [],
       error,
     };
   }
 
-  const drones = data ?? [];
+  const drones: Drone[] = data ?? [];
+
+  const signingPromises = drones.map(async (drone) => {
+    const { data } = await supabase.storage
+      .from("cdn")
+      .createSignedUrl(drone.image, 3600);
+
+    if (data) {
+      drone.image = data.signedUrl;
+    } else {
+      drone.image = "";
+    }
+  });
+
+  await Promise.all(signingPromises);
 
   return {
     drones,

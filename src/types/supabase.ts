@@ -72,6 +72,7 @@ export type Database = {
           image: string | null
           nickname: string | null
           status: number
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -79,7 +80,8 @@ export type Database = {
           id?: number
           image?: string | null
           nickname?: string | null
-          status: number
+          status?: number
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -88,6 +90,7 @@ export type Database = {
           image?: string | null
           nickname?: string | null
           status?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -99,24 +102,62 @@ export type Database = {
           },
         ]
       }
+      frame_variants: {
+        Row: {
+          created_at: string
+          frame_id: number
+          id: number
+          layout: number
+          prop_size: number
+        }
+        Insert: {
+          created_at?: string
+          frame_id: number
+          id?: number
+          layout: number
+          prop_size: number
+        }
+        Update: {
+          created_at?: string
+          frame_id?: number
+          id?: number
+          layout?: number
+          prop_size?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "frame_variants_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "frames"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       frames: {
         Row: {
           created_at: string
           id: number
+          is_public: boolean
           manufacturer_id: number | null
           name: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: number
+          is_public?: boolean
           manufacturer_id?: number | null
           name: string
+          user_id?: string
         }
         Update: {
           created_at?: string
           id?: number
+          is_public?: boolean
           manufacturer_id?: number | null
           name?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -132,17 +173,23 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          is_public: boolean
           name: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: number
+          is_public?: boolean
           name: string
+          user_id?: string
         }
         Update: {
           created_at?: string
           id?: number
+          is_public?: boolean
           name?: string
+          user_id?: string
         }
         Relationships: []
       }

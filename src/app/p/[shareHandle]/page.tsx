@@ -1,17 +1,16 @@
 import { PilotIdCard } from "@/components/pilot-id/pilot-id-card";
 import { CodeBlock } from "@/components/ui/code-block";
-import { getSupabaseServer } from "@/lib/supabase-server";
+import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { Pilot } from "@/types/supabase-custom";
 import { useEffect } from "react";
 
 async function pilotProfileFetcher(shareHandle: string) {
-  const supabase = getSupabaseServer();
+  const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("pilots")
     .select("*")
     .eq("share_handle", shareHandle)
-    .limit(1)
-    .returns<Pilot[]>();
+    .limit(1);
 
   if (error?.code === "PGRST116") {
     return {
@@ -43,6 +42,11 @@ export default async function PilotIdPage(props: Props) {
 
   const { error, data: pilot } = await pilotProfileFetcher(shareHandle);
 
+  const {
+    data: { user },
+  } = await getSupabaseServerClient().auth.getUser();
+  const editMode = user?.id === pilot?.user_id;
+
   if (error) {
     return (
       <div>
@@ -62,5 +66,5 @@ export default async function PilotIdPage(props: Props) {
     );
   }
 
-  return <PilotIdCard pilot={pilot} />;
+  return <PilotIdCard pilot={pilot} editMode={editMode} />;
 }

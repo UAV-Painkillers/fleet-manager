@@ -2,7 +2,6 @@ import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Drone, DroneStatus } from "@/types/supabase-custom";
 import Image from "next/image";
-
 interface DroneCardProps {
   drone: Drone;
 }
@@ -19,8 +18,6 @@ export function DroneCard({ drone }: DroneCardProps) {
     }
   };
 
-  const fallbackImage = "/placeholder.svg";
-
   return (
     <Card className="cursor-pointer hover:shadow-lg transition-shadow">
       <CardContent className="p-4">
@@ -29,13 +26,18 @@ export function DroneCard({ drone }: DroneCardProps) {
           {getStatusIcon(drone.status)}
         </div>
         <div className="flex justify-between items-start">
-          <small>Manufacturer: <b>{drone.frame?.manufacturer?.name ?? '-'}</b></small>
+          <small>
+            Manufacturer: <b>{drone.frame?.manufacturer?.name ?? "-"}</b>
+          </small>
         </div>
         <div className="flex justify-between items-start mb-2">
-          <small>Frame: <b>{drone.frame?.name ?? '-'}</b></small>
+          <small>
+            Frame: <b>{drone.frame?.name ?? "-"}</b>
+          </small>
         </div>
+        <pre>{JSON.stringify(drone, null, 4)}</pre>
         <Image
-          src={drone.image ?? fallbackImage}
+          src={drone.image ?? "/placeholder.svg"}
           alt={drone.nickname!}
           width={100}
           height={100}

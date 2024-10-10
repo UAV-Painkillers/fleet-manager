@@ -6,7 +6,7 @@ import { NavMobile } from "@/components/nav-menu/nav-mobile";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
-import { AuthenticationProvider } from "@/components/auth/authentication";
+import { getSupabaseServerClient } from "@/lib/supabase.server";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -16,11 +16,15 @@ export const metadata: Metadata = {
 };
 
 export type AppLayoutProps = React.PropsWithChildren & {
-  childrenRequireAuthentication?: boolean;
+  minimal?: boolean;
 };
-export default function RootLayout(props: AppLayoutProps) {
-  const { children, childrenRequireAuthentication = true } = props;
-  const isAuthenticated = false;
+export default async function RootLayout(props: AppLayoutProps) {
+  const { children, minimal = false } = props;
+
+  const {
+    data: { user },
+  } = await getSupabaseServerClient().auth.getUser();
+  const isAuthenticated = !!user;
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
@@ -38,17 +42,18 @@ export default function RootLayout(props: AppLayoutProps) {
         >
           <Toaster theme="system" duration={6000} richColors closeButton />
 
-          <AuthenticationProvider
-            childrenRequireAuthentication={childrenRequireAuthentication}
+          {!minimal && <Header />}
+
+          <main
+            className={
+              "flex-1 grid grid-cols-1 " +
+              (minimal ? "" : "gap-8 px-4 lg:px-8 py-8")
+            }
           >
-            <Header />
+            {children}
+          </main>
 
-            <main className="flex-1 grid grid-cols-1 gap-8 px-4 lg:px-8 py-8">
-              {children}
-            </main>
-
-            <NavMobile />
-          </AuthenticationProvider>
+          <NavMobile isAuthenticated={isAuthenticated} />
         </ThemeProvider>
       </body>
     </html>

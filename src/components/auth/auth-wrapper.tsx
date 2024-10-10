@@ -5,7 +5,7 @@ interface Props {
 }
 export function AuthWrapper(props: Props & React.PropsWithChildren) {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-100 px-4 dark:bg-gray-950">
+    <div className="flex items-center justify-center bg-gray-100 px-4 dark:bg-gray-950">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
         <div className="space-y-4">
           <div className="text-center">

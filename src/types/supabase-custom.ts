@@ -17,3 +17,11 @@ export type Drone = Omit<Database["public"]["Tables"]["drones"]["Row"], 'status'
   frame?: Frame;
   status: DroneStatus[keyof DroneStatus];
 };
+
+export const FullDroneSelectStatement = `
+  *,
+  frame:frame_id (
+    *,
+    manufacturer:manufacturer_id (*)
+  )
+`;
