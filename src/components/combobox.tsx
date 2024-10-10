@@ -26,9 +26,10 @@ type Option = {
 
 interface Props {
   options: Option[];
-  value: Option['value'] | null;
-  onValueChange: (value: Option['value'] | null) => void;
+  value?: Option['value'] | null;
+  onValueChange?: (value: Option['value'] | null) => void;
   label: string;
+  name?: string;
 }
 
 export function Combobox(props: Props) {
@@ -63,7 +64,7 @@ export function Combobox(props: Props) {
       </DrawerTrigger>
       <DrawerContent>
         <div className="mt-4 border-t">
-          <OptionsList setOpen={setOpen} setSelection={props.onValueChange} options={props.options} />
+          <OptionsList setOpen={setOpen} setSelection={props.onValueChange} options={props.options} inputName={props.name} />
         </div>
       </DrawerContent>
     </Drawer>
@@ -74,14 +75,16 @@ function OptionsList({
   setOpen,
   setSelection,
   options,
+  inputName,
 }: {
   setOpen: (open: boolean) => void;
-  setSelection: (option: Option['value'] | null) => void;
+  setSelection?: (option: Option['value'] | null) => void;
   options: Option[];
+  inputName?: string
 }) {
   return (
     <Command>
-      <CommandInput placeholder="Select Option..." />
+      <CommandInput name={inputName} placeholder="Select Option..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
@@ -90,7 +93,9 @@ function OptionsList({
               key={option.value}
               value={option.value}
               onSelect={(value) => {
-                setSelection(value);
+                if (typeof setSelection === 'function') {
+                  setSelection(value);
+                }
                 setOpen(false);
               }}
               keywords={[option.label]}

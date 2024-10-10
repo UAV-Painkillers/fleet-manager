@@ -1,3 +1,3 @@
-import AppLayout from "../app-layout";
+import AppLayout, {AppLayoutProps} from "../app-layout";
 
 export default AppLayout;

@@ -3,13 +3,13 @@
 import { Combobox } from "@/components/combobox";
 import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { Frame } from "@/types/supabase-custom";
-
+import {toast} from 'sonner'
 interface Props {
-  onValueChange: (frameId: Frame["id"]) => void;
-  value: Frame["id"] | null;
+  onValueChange?: (frameId: Frame["id"]) => void;
+  value?: Frame["id"] | null;
 }
 
-async function fetchFrames() {
+async function fetchFrames(): Promise<Partial<{frames: Frame[], error: Error}>> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("frames")
@@ -20,10 +20,10 @@ async function fetchFrames() {
   if (error) {
     // TODO: handle error
     console.error(error);
-    return;
+    return {error};
   }
 
-  return data ?? [];
+  return {frames: data ?? []};
 };
 
 function getFrameName(frame: Frame) {
@@ -35,15 +35,26 @@ function getFrameName(frame: Frame) {
 }
 
 export async function FrameSelect(props: Props) {
-  const frames = await fetchFrames();
+  const {error, frames} = await fetchFrames();
+
+  const options = (frames ?? []).map((f) => ({
+    value: String(f.id),
+    label: getFrameName(f),
+  }));
+
+  if (error) {
+    options.push({
+      value: '',
+      label: 'Could not load frames...',
+    });
+
+    toast.error('Error loading frames: ' + error.message);
+  }
 
   return (
     <Combobox
       label="Frame"
-      options={frames.map((f) => ({
-        value: String(f.id),
-        label: getFrameName(f),
-      }))}
+      options={options}
       value={String(props.value)}
       name="frame"
     />

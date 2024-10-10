@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ImageIcon, X } from "lucide-react";
+import Image from "next/image";
 
 type ImageUploadProps = {
   onChange: (file: File | null) => void;
@@ -60,7 +61,7 @@ export function ImageInput({ onChange, mimeTypes }: ImageUploadProps) {
           className="flex items-center justify-center w-full h-32 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none"
         >
           {preview ? (
-            <img
+            <Image
               src={preview}
               alt="Preview"
               className="object-contain w-full h-full rounded-md"

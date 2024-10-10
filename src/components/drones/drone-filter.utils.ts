@@ -30,7 +30,7 @@ export function useDroneFilterCriteria() {
       }
     });
 
-    router.push(`?${newParams.toString()}`, { shallow: true });
+    router.push(`?${newParams.toString()}`);
   };
 
   return {
@@ -39,7 +39,7 @@ export function useDroneFilterCriteria() {
     statusFilter,
     setSortBy: (sortBy: SortBy) => updateQueryParams({ sortBy }),
     setFilterText: (filterText: string) => updateQueryParams({ filterText }),
-    setStatusFilter: (statusFilter: DroneStatus) =>
+    setStatusFilter: (statusFilter: DroneStatus[keyof DroneStatus] | 'all') =>
       updateQueryParams({ statusFilter: statusFilter.toString() }),
   };
 }

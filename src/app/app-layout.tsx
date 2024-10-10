@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export type AppLayoutProps = React.PropsWithChildren & {
   minimal?: boolean;
 };
-export default async function RootLayout(props: AppLayoutProps) {
+async function AppLayout(props: AppLayoutProps) {
   const { children, minimal = false } = props;
 
   const {
@@ -58,4 +58,12 @@ export default async function RootLayout(props: AppLayoutProps) {
       </body>
     </html>
   );
+}
+
+export default function BasicAppLayout(props: Omit<AppLayoutProps, 'minimal'>) {
+  return <AppLayout minimal={false}>{props.children}</AppLayout>
+}
+
+export function MinimalAppLayout(props: Omit<AppLayoutProps, 'minimal'>) {
+  return <AppLayout minimal={true}>{props.children}</AppLayout>
 }

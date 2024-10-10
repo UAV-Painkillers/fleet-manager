@@ -3,7 +3,7 @@
 import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { redirect } from "next/navigation";
 
-export function redirectToLogin() {
+export async function redirectToLogin() {
   redirect("/auth/login");
 }
 

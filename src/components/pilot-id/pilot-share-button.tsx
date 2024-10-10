@@ -14,5 +14,9 @@ export function PilotShareButton(props: PilotShareButtonProps) {
 
   const pilotShareURL = usePilotShareURL(shareHandle);
 
+  if (!pilotShareURL) {
+    return null;
+  }
+
   return <ShareButton {...rest} text={pilotShareURL} />;
 }

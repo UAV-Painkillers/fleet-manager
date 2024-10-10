@@ -43,14 +43,21 @@ export function SortFilter() {
       </div>
       <div className="flex flex-col gap-2">
         <Label>Filter by status</Label>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={String(statusFilter)} onValueChange={(val: string) => {
+          if (val === 'all') {
+            setStatusFilter('all');
+            return;
+          }
+
+          setStatusFilter(parseInt(val, 10) as DroneStatus[keyof DroneStatus]);
+        }}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
             {Object.keys(DroneStatus).map((statusLabel) => (
-              <SelectItem value={DroneStatus[statusLabel as keyof DroneStatus]} key={DroneStatus[statusLabel as keyof DroneStatus]}>
+              <SelectItem value={String(DroneStatus[statusLabel as keyof DroneStatus])} key={DroneStatus[statusLabel as keyof DroneStatus]}>
                 {statusLabel}
               </SelectItem>
             ))}

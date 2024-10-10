@@ -113,7 +113,7 @@ export function DroneUpsertForm({
     }
 
     onOpenChange(false);
-  }, [confirm, image, nickname, selectedFrameId]);
+  }, [confirm, image, nickname, selectedFrameId, onOpenChange]);
 
   useEffect(() => {
     if (!open) {

@@ -24,7 +24,7 @@ export function AddDroneCard(props: Props) {
     }
 
     setShowUpsertForm(false);
-  }, []);
+  }, [props]);
 
   return (
     <>

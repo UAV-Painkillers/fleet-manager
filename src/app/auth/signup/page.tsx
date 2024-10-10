@@ -1,11 +1,8 @@
 import { AuthWrapper } from "@/components/auth/auth-wrapper";
-import { ChromeIcon } from "@/components/icons/chrome-icon";
-import { DiscordIcon } from "@/components/icons/discord-icon";
-import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signup } from "./actions";
+import { signup, redirectToLogin } from "./actions";
 
 export default function SignupPage() {
   return (

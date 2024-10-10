@@ -24,6 +24,6 @@ export async function signup(formData: FormData) {
   redirect("/");
 }
 
-export function redirectToLogin() {
+export async function redirectToLogin() {
   redirect("/auth/login");
 }
