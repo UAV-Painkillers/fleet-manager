@@ -85,7 +85,7 @@ export default function AnimatedErrorContent({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
         >
-          Don't worry, our team of highly caffeinated developers is on it!
+          Don&apos;t worry, our team of highly caffeinated developers is on it!
         </motion.p>
         {stackTrace && (
           <motion.div

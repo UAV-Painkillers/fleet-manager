@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseServerClient } from "@/lib/supabase.server";
+import { AuthSessionMissingError } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 
 interface UploadImageProps {
@@ -24,7 +25,7 @@ export async function uploadFileAction({
 
   if (!user) {
     return {
-      error: "NOT_AUTHENTICATED",
+      error: new AuthSessionMissingError(),
     };
   }
 
