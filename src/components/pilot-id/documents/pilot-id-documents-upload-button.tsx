@@ -30,6 +30,8 @@ export function PilotIdDocumentsUploadButton(props: Props) {
 
   const onSubmit = useCallback(async (formData: FormData) => {
     startUploadTransition(async () => {
+      const file = formData.get("file") as any;
+      formData.set("fileNameUTF8", file.name);
       const { error, document } = await uploadDocumentFormAction(formData);
 
       if (error) {

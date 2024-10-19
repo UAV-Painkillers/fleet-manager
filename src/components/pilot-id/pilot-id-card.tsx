@@ -181,7 +181,7 @@ export async function PilotIdCard(props: {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-4 sm:space-y-0">
                   <div className="space-y-2">
                     {pilot.contact_phone && (
                       <div className="flex items-center space-x-4">
@@ -203,10 +203,10 @@ export async function PilotIdCard(props: {
                     )}
                   </div>
 
-                  <div className="rounded-lg overflow-hidden">
+                  <div className="rounded-lg overflow-hidden self-center sm:self-auto">
                     <PilotShareQRCode
                       shareHandle={pilot.share_handle ?? ""}
-                      width={100}
+                      width={200}
                     />
                   </div>
                 </div>

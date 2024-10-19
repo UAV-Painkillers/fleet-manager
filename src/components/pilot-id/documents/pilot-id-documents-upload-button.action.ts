@@ -4,9 +4,12 @@ import { uploadFileAction } from "@/lib/file-upload.action";
 import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { Document } from "@/types/supabase-custom";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
-async function createFileMetaData(file: File, fileId: string) {
+async function createFileMetaData(
+  file: File,
+  fileNameUTF8: string,
+  fileId: string
+) {
   const supabase = getSupabaseServerClient();
 
   const {
@@ -20,9 +23,9 @@ async function createFileMetaData(file: File, fileId: string) {
   }
 
   const meta: Omit<Document, "id" | "created_at"> = {
-    original_file_name: file.name,
+    original_file_name: fileNameUTF8,
     path: fileId,
-    name: file.name,
+    name: fileNameUTF8,
     user_id: user.id,
     category: "miscellaneous",
   };
@@ -42,7 +45,7 @@ async function createFileMetaData(file: File, fileId: string) {
   return { data };
 }
 
-async function uploadDocument(file: File) {
+async function uploadDocument(file: File, fileNameUTF8: string) {
   const { error: uploadError, fullFilePath } = await uploadFileAction({
     bucketName: "documents",
     file,
@@ -56,6 +59,7 @@ async function uploadDocument(file: File) {
 
   const { error: metaError, data } = await createFileMetaData(
     file,
+    fileNameUTF8,
     fullFilePath!
   );
 
@@ -99,6 +103,7 @@ async function getShareHandleOfCurrentUser() {
 
 export async function uploadDocumentFormAction(formData: FormData) {
   const file = formData.get("file") as File;
+  const fileNameUTF8 = formData.get("fileNameUTF8") as string;
 
   const { error: shareHandleError, shareHandle } =
     await getShareHandleOfCurrentUser();
@@ -107,7 +112,7 @@ export async function uploadDocumentFormAction(formData: FormData) {
     return { error: shareHandleError };
   }
 
-  const { error: uploadError, meta } = await uploadDocument(file);
+  const { error: uploadError, meta } = await uploadDocument(file, fileNameUTF8);
 
   if (uploadError) {
     return { error: uploadError };
