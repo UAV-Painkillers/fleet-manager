@@ -1,30 +1,15 @@
-"use server";
+"use client";
 
 import { Combobox } from "@/components/combobox";
-import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { Frame } from "@/types/supabase-custom";
-import {toast} from 'sonner'
+import { useEffect, useMemo, useState } from "react";
+import { fetchFrames } from "./frame-select.actions";
+import { PostgrestError } from "@supabase/supabase-js";
+
 interface Props {
-  onValueChange?: (frameId: Frame["id"]) => void;
+  onValueChange?: (frameId: Frame["id"] | null) => void;
   value?: Frame["id"] | null;
 }
-
-async function fetchFrames(): Promise<Partial<{frames: Frame[], error: Error}>> {
-  const supabase = getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("frames")
-    .select("*, manufacturer:manufacturer_id (*)")
-    .order("name", { ascending: true })
-    .order("name", { ascending: true, referencedTable: "manufacturer" });
-
-  if (error) {
-    // TODO: handle error
-    console.error(error);
-    return {error};
-  }
-
-  return {frames: data ?? []};
-};
 
 function getFrameName(frame: Frame) {
   if (!frame.manufacturer) {
@@ -34,28 +19,58 @@ function getFrameName(frame: Frame) {
   return `${frame.manufacturer.name} ${frame.name}`;
 }
 
-export async function FrameSelect(props: Props) {
-  const {error, frames} = await fetchFrames();
+export function FrameSelect(props: Props) {
+  const [frames, setFrames] = useState<Frame[]>([]);
+  const [error, setError] = useState<Error | PostgrestError | null>(null);
+  const [selectedFrameId, setSelectedFrameId] = useState<Frame["id"] | null>(
+    props.value ?? null
+  );
 
-  const options = (frames ?? []).map((f) => ({
-    value: String(f.id),
-    label: getFrameName(f),
-  }));
+  useEffect(() => {
+    setSelectedFrameId(props.value ?? null);
+  }, [props.value]);
 
-  if (error) {
-    options.push({
-      value: '',
-      label: 'Could not load frames...',
+  useEffect(() => {
+    fetchFrames().then(({ frames, error }) => {
+      setFrames(frames ?? []);
+      setError(error ?? null);
     });
+  }, []);
 
-    toast.error('Error loading frames: ' + error.message);
-  }
+  const options = useMemo(() => {
+    const items = (frames ?? []).map((f: Frame) => ({
+      value: String(f.id),
+      label: getFrameName(f),
+    }));
+
+    if (error) {
+      items.push({
+        value: "",
+        label: "Could not load frames...",
+      });
+    }
+
+    return items;
+  }, [error, frames]);
 
   return (
     <Combobox
-      label="Frame"
+      label="Select a Frame"
       options={options}
-      value={String(props.value)}
+      value={String(selectedFrameId)}
+      onValueChange={(rawValue) => {
+        let value: Frame["id"] | null;
+        if (typeof rawValue === "string" && rawValue.length > 0) {
+          value = parseInt(rawValue, 10);
+        } else {
+          value = null;
+        }
+        
+        setSelectedFrameId(value);
+        if (typeof props.onValueChange === "function") {
+          props.onValueChange(value);
+        }
+      }}
       name="frame"
     />
   );

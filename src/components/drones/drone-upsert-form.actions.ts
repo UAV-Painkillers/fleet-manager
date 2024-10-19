@@ -6,6 +6,7 @@ import {
   Frame,
   FullDroneSelectStatement,
 } from "@/types/supabase-custom";
+import { AuthSessionMissingError } from "@supabase/supabase-js";
 
 interface CreateDroneProps {
   imagePath?: string;
@@ -21,9 +22,7 @@ export async function createDroneAction(droneData: CreateDroneProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return {
-      error: "NOT_AUTHENTICATED",
-    };
+    return { error: new AuthSessionMissingError() };
   }
 
   const { data, error } = await supabase

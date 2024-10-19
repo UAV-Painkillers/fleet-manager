@@ -1,3 +1,5 @@
+"use server";
+
 import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Drone, DroneStatus } from "@/types/supabase-custom";
@@ -6,7 +8,7 @@ interface DroneCardProps {
   drone: Drone;
 }
 
-export function DroneCard({ drone }: DroneCardProps) {
+export async function DroneCard({ drone }: DroneCardProps) {
   const getStatusIcon = (status: DroneStatus[keyof DroneStatus]) => {
     switch (status) {
       case DroneStatus.Perfect:
@@ -35,9 +37,8 @@ export function DroneCard({ drone }: DroneCardProps) {
             Frame: <b>{drone.frame?.name ?? "-"}</b>
           </small>
         </div>
-        <pre>{JSON.stringify(drone, null, 4)}</pre>
         <Image
-          src={drone.image ?? "/placeholder.svg"}
+          src={drone.image || "/placeholder.svg"}
           alt={drone.nickname!}
           width={100}
           height={100}

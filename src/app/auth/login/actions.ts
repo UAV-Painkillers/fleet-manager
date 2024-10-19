@@ -2,35 +2,27 @@
 
 import { getSupabaseServerClient } from "@/lib/supabase.server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
-export async function login(formData: FormData) {
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+export async function login(data: LoginData) {
   const supabase = getSupabaseServerClient();
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
-
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    console.log("login error");
-    redirect("/auth/login/error");
+    return {
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      },
+    };
   }
 
-  console.log("login success");
   revalidatePath("/", "layout");
-  console.log("redirecting to /");
-  redirect("/");
-}
 
-export async function redirectToPasswordReset() {
-  redirect("/auth/password-reset");
-}
-
-export async function redirectToRegister() {
-  redirect("/auth/register");
+  return { success: true };
 }

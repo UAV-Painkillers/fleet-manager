@@ -8,6 +8,8 @@ import {
   FullDroneSelectStatement,
   DroneStatus,
 } from "@/types/supabase-custom";
+import { PostgrestError } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 interface FetchDronesProps {
   sortBy: SortBy;
@@ -16,7 +18,7 @@ interface FetchDronesProps {
 }
 async function fetchDrones(
   props: FetchDronesProps
-): Promise<{ drones: Drone[]; error: Error | null }> {
+): Promise<{ drones: Drone[]; error: Error | PostgrestError | null }> {
   const { sortBy, filterText, statusFilter } = props;
 
   const supabase = getSupabaseServerClient();
@@ -50,14 +52,23 @@ async function fetchDrones(
   const drones: Drone[] = data ?? [];
 
   const signingPromises = drones.map(async (drone) => {
-    const { data } = await supabase.storage
+    if (!drone.image) {
+      drone.image = "";
+      return;
+    }
+
+    const response = await supabase.storage
       .from("cdn")
       .createSignedUrl(drone.image, 3600);
 
-    if (data) {
-      drone.image = data.signedUrl;
-    } else {
-      drone.image = "";
+    if (response.error) {
+      toast.error(response.error.message);
+      return;
+    }
+
+    drone.image = "";
+    if (response.data) {
+      drone.image = response.data.signedUrl;
     }
   });
 

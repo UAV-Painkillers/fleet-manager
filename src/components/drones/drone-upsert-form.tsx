@@ -11,11 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ImageInput } from "../image-input";
-import {
-  Drone,
-  Frame,
-  FullDroneSelectStatement,
-} from "@/types/supabase-custom";
+import { Drone, Frame } from "@/types/supabase-custom";
 import { FrameSelect } from "./frames/frame-select";
 import { useDialog } from "@/components/dialog";
 import { useFileUpload } from "@/hooks/use-image-upload";

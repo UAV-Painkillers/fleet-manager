@@ -10,19 +10,35 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") ?? "/";
 
-  if (token_hash && type) {
-    const supabase = getSupabaseServerClient();
-
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
+  const redirectToErrorPage = (error: { name: string; message: string }) => {
+    const errorUrl = new URL(request.url);
+    errorUrl.pathname = "/error";
+    errorUrl.searchParams.forEach((_value, key) => {
+      errorUrl.searchParams.delete(key);
     });
-    if (!error) {
-      // redirect user to specified redirect URL or root of app
-      redirect(next);
-    }
+    errorUrl.searchParams.set("name", error.name);
+    errorUrl.searchParams.set("message", error.message);
+    redirect(errorUrl.href);
+  };
+
+  if (!token_hash || !type) {
+    return redirectToErrorPage({
+      name: "MISSING_TOKEN_HASH",
+      message: "Missing token hash or type",
+    });
   }
 
-  // redirect the user to an error page with some instructions
-  redirect("/error");
+  const supabase = getSupabaseServerClient();
+
+  const { error } = await supabase.auth.verifyOtp({
+    type,
+    token_hash,
+  });
+
+  if (error) {
+    console.error(error);
+    return redirectToErrorPage(error);
+  }
+
+  redirect(next);
 }

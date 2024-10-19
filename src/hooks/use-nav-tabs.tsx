@@ -1,6 +1,11 @@
 import { DroneBlackIcon, DroneWhiteIcon } from "@/components/icons/drone-icon";
 import { usePathnameIsActive } from "@/hooks/use-pathname-is-active";
-import { ScanFaceIcon, BatteryMediumIcon } from "lucide-react";
+import {
+  ScanFaceIcon,
+  BatteryMediumIcon,
+  LogOutIcon,
+  LogInIcon,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useMemo } from "react";
 
@@ -8,9 +13,10 @@ export interface NavTab {
   pathname: string;
   label: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  isActive?: boolean;
 }
 
-export function useNavTabs() {
+export function useNavTabs(isAuthenticated: boolean) {
   const pathnameIsActive = usePathnameIsActive();
   const { resolvedTheme } = useTheme();
 
@@ -31,15 +37,28 @@ export function useNavTabs() {
         label: "Parts",
         icon: BatteryMediumIcon,
       },
+      isAuthenticated
+        ? {
+            pathname: "/auth/logout",
+            label: "Logout",
+            icon: LogOutIcon,
+            isActive: false,
+          }
+        : {
+            pathname: "/auth/login",
+            label: "Login",
+            icon: LogInIcon,
+            isActive: true,
+          },
     ],
-    [resolvedTheme]
+    [isAuthenticated, resolvedTheme]
   );
 
   const tabsWithActiveState: (NavTab & { isActive: boolean })[] =
     useMemo(() => {
       return allTabs.map((tab) => ({
         ...tab,
-        isActive: pathnameIsActive(tab.pathname),
+        isActive: tab.isActive || pathnameIsActive(tab.pathname),
       }));
     }, [pathnameIsActive, allTabs]);
 

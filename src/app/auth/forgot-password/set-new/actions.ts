@@ -1,17 +1,15 @@
 "use server";
 
 import { getSupabaseServerClient } from "@/lib/supabase.server";
-import { redirect } from "next/navigation";
 
-interface SignupData {
-  email: string;
+export interface ChangePasswordData {
   password: string;
 }
 
-export async function signup(data: SignupData) {
-  const supabase = getSupabaseServerClient();
-
-  const { error } = await supabase.auth.signUp(data);
+export async function changePassword(data: ChangePasswordData) {
+  const { error } = await getSupabaseServerClient().auth.updateUser({
+    password: data.password,
+  });
 
   if (error) {
     return {
@@ -25,9 +23,5 @@ export async function signup(data: SignupData) {
 
   return {
     success: true,
-  }
-}
-
-export async function redirectToLogin() {
-  redirect("/auth/login");
+  };
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from "react"
 import { DialogType, DialogContext } from "./dialog.context";
 import { DialogComponent } from "./dialog.component";
